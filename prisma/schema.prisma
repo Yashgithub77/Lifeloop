@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+// User & Profile
+model User {
+  id                    String   @id @default(uuid())
+  name                  String
+  email                 String   @unique
+  avatar                String?
+  collegeHoursStart     String   @default("08:00") // "HH:MM"
+  collegeHoursEnd       String   @default("17:00") // "HH:MM"
+  sleepHoursStart       String   @default("23:00") // "HH:MM"
+  sleepHoursEnd         String   @default("06:00") // "HH:MM"
+  dailyAvailableMinutes Int      @default(180)
+  
+  // Preferences (Embedded as fields for simplicity, could be a separate model)
+  prefSessionLength     Int      @default(45)
+  prefBreakDuration     Int      @default(10)
+  prefFocusStart        String   @default("18:00")
+  prefFocusEnd          String   @default("22:00")
+  prefNotifications     Boolean  @default(true)
+
+  goals                 Goal[]
+  tasks                 Task[]
+  actions               AgentAction[]
+  insights              DailyInsight[]
+  patterns              BehaviorPattern[]
+  fitnessData           FitnessData[]
+  calendarEvents        CalendarEvent[]
+  coachMessages         CoachMessage[]
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+// Goals
+model Goal {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  title         String
+  description   String?
+  category      String   // Study, Fitness, etc.
+  priority      String   // high, medium, low
+  targetWeeks   Int
+  targetValue   Int?
+  currentValue  Int      @default(0)
+  unit          String?
+  deadline      DateTime?
+  isRecurring   Boolean  @default(false)
+  color         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tasks         Task[]
+}
+
+// Tasks
+model Task {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  goalId           String
+  goal             Goal     @relation(fields: [goalId], references: [id])
+  title            String
+  description      String?
+  dayIndex         Int      // 0–6
+  scheduledDate    DateTime // Stored as DateTime, frontend uses string
+  estimatedMinutes Int
+  actualMinutes    Int?
+  startTime        String   // "HH:MM"
+  endTime          String?
+  status           String   // pending, in_progress, done, etc.
+  difficulty       String   // easy, medium, hard
+  completedAt      DateTime?
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// Integrations Data
+model CalendarEvent {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  externalId String? // ID from Google Calendar
+  title     String
+  start     DateTime
+  end       DateTime
+  type      String   // deadline, meeting, etc.
+  source    String   // google, outlook, manual
+  color     String?
+}
+
+model FitnessData {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  date           DateTime
+  steps          Int
+  stepsGoal      Int
+  activeMinutes  Int
+  caloriesBurned Int
+  distanceKm     Float
+  heartRateAvg   Int?
+  sleepHours     Float?
+  sleepQuality   String? 
+}
+
+// Agent Logs
+model AgentAction {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String
+  title       String?
+  description String?
+  timestamp   DateTime @default(now())
+  input       String?
+  output      String?
+  status      String
+  duration    Int?
+}
+
+// Insights
+model DailyInsight {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  date           DateTime
+  tasksCompleted Int
+  tasksTotal     Int
+  completionRate Float
+  focusMinutes   Int
+  streakDays     Int
+  mood           String?
+  energyLevel    String?
+}
+
+model BehaviorPattern {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String
+  title       String
+  description String
+  insight     String
+  confidence  Float
+  detectedAt  DateTime @default(now())
+  dataPoints  Int
+}
+
+model CoachMessage {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  message       String
+  type          String
+  timestamp     DateTime @default(now())
+  relatedTaskId String?
+  relatedGoalId String?
+}
