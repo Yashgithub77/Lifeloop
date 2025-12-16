@@ -40,8 +40,10 @@ function analyzeProductivityPatterns(tasks: Task[]): BehaviorPattern[] {
         patterns.push({
             id: `pattern-${Date.now()}-1`,
             type: "productivity_peak",
+            title: "Peak Productivity Time",
+            description: `Your ${bestPeriod} sessions are most effective`,
             insight: `Your most productive time is ${bestPeriod} with ${Math.round(bestRate)}% task completion rate.`,
-            confidence: Math.min(90, bestRate + 10),
+            confidence: Math.min(0.9, (bestRate + 10) / 100),
             detectedAt: now,
             dataPoints: tasks.length,
         });
@@ -54,9 +56,11 @@ function analyzeProductivityPatterns(tasks: Task[]): BehaviorPattern[] {
     patterns.push({
         id: `pattern-${Date.now()}-2`,
         type: "completion_rate",
+        title: "Task Completion Rate",
+        description: completionRate >= 70 ? "Great consistency!" : "Room for improvement",
         insight: `Your overall completion rate is ${Math.round(completionRate)}%. ${completionRate >= 70 ? "Great consistency!" : "Room for improvement—try smaller tasks."
             }`,
-        confidence: Math.min(95, 50 + completionRate / 2),
+        confidence: Math.min(0.95, (50 + completionRate / 2) / 100),
         detectedAt: now,
         dataPoints: tasks.length,
     });
@@ -72,8 +76,10 @@ function analyzeProductivityPatterns(tasks: Task[]): BehaviorPattern[] {
         patterns.push({
             id: `pattern-${Date.now()}-3`,
             type: "skip_pattern",
+            title: "Task Skipping Pattern",
+            description: "Some tasks are being skipped",
             insight: skipReason,
-            confidence: 75,
+            confidence: 0.75,
             detectedAt: now,
             dataPoints: skippedTasks.length,
         });
@@ -92,11 +98,13 @@ function analyzeProductivityPatterns(tasks: Task[]): BehaviorPattern[] {
         patterns.push({
             id: `pattern-${Date.now()}-4`,
             type: "focus_duration",
+            title: "Focus Session Duration",
+            description: `Average session: ${avgDuration} mins`,
             insight: `Your average focus session is ${avgDuration} mins (planned: ${plannedAvg} mins). ${avgDuration < plannedAvg
-                    ? "You finish faster than expected!"
-                    : "Tasks take longer—consider adding buffer time."
+                ? "You finish faster than expected!"
+                : "Tasks take longer—consider adding buffer time."
                 }`,
-            confidence: 80,
+            confidence: 0.8,
             detectedAt: now,
             dataPoints: tasksWithActual.length,
         });
@@ -109,7 +117,7 @@ function analyzeProductivityPatterns(tasks: Task[]): BehaviorPattern[] {
 function calculateDailyInsight(tasks: Task[], fitnessData: FitnessData): DailyInsight {
     const todayTasks = tasks.filter((t) => t.dayIndex === 0);
     const completed = todayTasks.filter((t) => t.status === "done").length;
-    const totalFocusMinutes = todayTasks
+    const focusMinutes = todayTasks
         .filter((t) => t.status === "done")
         .reduce((sum, t) => sum + (t.actualMinutes || t.estimatedMinutes), 0);
 
@@ -126,15 +134,21 @@ function calculateDailyInsight(tasks: Task[], fitnessData: FitnessData): DailyIn
         mood = "tired";
     }
 
-    // Energy level estimation
-    const energyLevel = Math.min(10, Math.round((completionRate + stepsAchieved) / 20));
+    // Energy level estimation (as string)
+    let energyLevel: DailyInsight["energyLevel"] = "medium";
+    const energyScore = (completionRate + stepsAchieved) / 2;
+    if (energyScore >= 70) {
+        energyLevel = "high";
+    } else if (energyScore < 40) {
+        energyLevel = "low";
+    }
 
     return {
         date: new Date().toISOString().split("T")[0],
         tasksCompleted: completed,
         tasksTotal: todayTasks.length,
         completionRate,
-        totalFocusMinutes,
+        focusMinutes,
         streakDays: Math.floor(Math.random() * 7) + 1, // Simplified
         mood,
         energyLevel,
@@ -171,7 +185,7 @@ function generateRecommendations(patterns: BehaviorPattern[], insight: DailyInsi
     }
 
     // Based on energy level
-    if (insight.energyLevel && insight.energyLevel <= 4) {
+    if (insight.energyLevel === "low") {
         recommendations.push("Your energy seems low—prioritize rest and lighter tasks tomorrow.");
     }
 
