@@ -3,6 +3,35 @@
 import { useState, useRef, useEffect } from "react";
 import { Task, Goal } from "@/types";
 
+// Type declarations for Web Speech API
+interface ISpeechRecognition extends EventTarget {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    start(): void;
+    stop(): void;
+    onresult: ((event: ISpeechRecognitionEvent) => void) | null;
+    onerror: ((event: Event) => void) | null;
+    onend: (() => void) | null;
+}
+
+interface ISpeechRecognitionEvent extends Event {
+    results: {
+        [index: number]: {
+            [index: number]: {
+                transcript: string;
+            };
+        };
+    };
+}
+
+declare global {
+    interface Window {
+        SpeechRecognition: new () => ISpeechRecognition;
+        webkitSpeechRecognition: new () => ISpeechRecognition;
+    }
+}
+
 interface Message {
     id: string;
     role: "user" | "assistant";
@@ -32,7 +61,7 @@ export default function Chatbot({ tasks, goals, onCreateTask, onCompleteTask, on
     const [isListening, setIsListening] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const recognitionRef = useRef<SpeechRecognition | null>(null);
+    const recognitionRef = useRef<ISpeechRecognition | null>(null);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -285,8 +314,8 @@ export default function Chatbot({ tasks, goals, onCreateTask, onCompleteTask, on
                             >
                                 <div
                                     className={`max-w-[80%] p-3 rounded-2xl ${msg.role === "user"
-                                            ? "rounded-br-md"
-                                            : "rounded-bl-md"
+                                        ? "rounded-br-md"
+                                        : "rounded-bl-md"
                                         }`}
                                     style={{
                                         background: msg.role === "user" ? "var(--primaryGradient)" : "var(--backgroundSecondary)",
@@ -349,12 +378,4 @@ export default function Chatbot({ tasks, goals, onCreateTask, onCompleteTask, on
             )}
         </>
     );
-}
-
-// Add type declarations for Web Speech API
-declare global {
-    interface Window {
-        SpeechRecognition: typeof SpeechRecognition;
-        webkitSpeechRecognition: typeof SpeechRecognition;
-    }
 }

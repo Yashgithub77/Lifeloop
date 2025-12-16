@@ -61,7 +61,6 @@ export default function ThemeSelector({ compact = false }: ThemeSelectorProps) {
                                         }`}
                                     style={{
                                         background: themeName === theme.name ? "var(--backgroundSecondary)" : undefined,
-                                        ringColor: "var(--primary)",
                                     }}
                                 >
                                     <span className="text-xl">{theme.emoji}</span>
@@ -103,7 +102,6 @@ export default function ThemeSelector({ compact = false }: ThemeSelectorProps) {
                         style={{
                             background: themeName === theme.name ? "var(--backgroundSecondary)" : "var(--inputBg)",
                             border: `1px solid ${themeName === theme.name ? "var(--primary)" : "var(--cardBorder)"}`,
-                            ringColor: "var(--primary)",
                         }}
                     >
                         <span className="text-2xl">{theme.emoji}</span>
