@@ -24,7 +24,7 @@ interface AITaskSuggestion {
 
 export async function generateTasksWithAI(input: AITaskGenerationInput): Promise<AITaskSuggestion[]> {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
         const prompt = `You are an AI life planning assistant. Generate a detailed study/work plan based on these goals:
 
@@ -98,7 +98,7 @@ Generate 20-30 tasks covering all goals. Make it realistic and achievable.`;
 
 export async function generateDailyInsight(completedTasks: Task[], totalTasks: Task[]): Promise<string> {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
         const prompt = `You are a motivational AI coach. Analyze today's productivity:
 
@@ -128,7 +128,7 @@ export async function generateSmartReschedule(
     existingTasks: Task[]
 ): Promise<{ newDayIndex: number; newStartTime: string; reason: string }> {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
         const prompt = `A user skipped this task:
 Task: ${skippedTask.title}

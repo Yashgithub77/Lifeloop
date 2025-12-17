@@ -17,6 +17,10 @@ import GoogleIntegration from "@/components/GoogleIntegration";
 import CalendarSync from "@/components/CalendarSync";
 import { useCalendarAutoSync } from "@/hooks/useCalendarAutoSync";
 import AIInsights from "@/components/AIInsights";
+import PomodoroTimer from "@/components/PomodoroTimer";
+import AchievementBadges from "@/components/AchievementBadges";
+import ActivityHeatmap from "@/components/ActivityHeatmap";
+import BreathingExercise from "@/components/BreathingExercise";
 
 interface DashboardData {
     goals: Goal[];
@@ -38,7 +42,7 @@ export default function DashboardPage() {
     const router = useRouter();
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<"today" | "insights" | "settings">("today");
+    const [activeTab, setActiveTab] = useState<"today" | "focus" | "wellness" | "achievements" | "insights" | "settings">("today");
     const [isReplanning, setIsReplanning] = useState(false);
     const [latestCoachMessage, setLatestCoachMessage] = useState<CoachMessage | null>(null);
 
@@ -279,18 +283,21 @@ export default function DashboardPage() {
 
                 {/* Tab Navigation */}
                 <div
-                    className="flex gap-1 p-1 rounded-xl w-fit"
+                    className="flex gap-1 p-1 rounded-xl w-fit overflow-x-auto"
                     style={{ background: "var(--backgroundSecondary)" }}
                 >
                     {[
                         { id: "today", label: "Today's Plan", icon: "📋" },
+                        { id: "focus", label: "Focus", icon: "⏱️" },
+                        { id: "wellness", label: "Wellness", icon: "🧘" },
+                        { id: "achievements", label: "Achievements", icon: "🏆" },
                         { id: "insights", label: "Insights", icon: "📈" },
                         { id: "settings", label: "Settings", icon: "⚙️" },
                     ].map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                            className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                            className="px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
                             style={{
                                 background: activeTab === tab.id ? "var(--primaryGradient)" : "transparent",
                                 color: activeTab === tab.id ? "white" : "var(--foregroundMuted)",
@@ -434,6 +441,26 @@ export default function DashboardPage() {
                                     onApply={handleApplyAdjustment}
                                 />
                                 <WeekOverview tasks={data.tasks} goals={data.goals} />
+                            </>
+                        )}
+
+                        {activeTab === "focus" && (
+                            <>
+                                <PomodoroTimer />
+                                <ActivityHeatmap tasks={data.tasks} />
+                            </>
+                        )}
+
+                        {activeTab === "wellness" && (
+                            <>
+                                <BreathingExercise />
+                            </>
+                        )}
+
+                        {activeTab === "achievements" && (
+                            <>
+                                <AchievementBadges tasks={data.tasks} />
+                                <ActivityHeatmap tasks={data.tasks} />
                             </>
                         )}
 

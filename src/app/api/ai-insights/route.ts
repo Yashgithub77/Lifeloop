@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
         const todayTasks = tasks.filter((t: any) => t.dayIndex === 0);
         const completed = todayTasks.filter((t: any) => t.status === "done");
