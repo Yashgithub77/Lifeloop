@@ -27,9 +27,11 @@ export default function WeekOverview({ tasks, goals }: WeekOverviewProps) {
 
     // Get goal color map
     const goalColors: Record<string, string> = {};
-    goals.forEach((g) => {
-        goalColors[g.id] = g.color || "#6366f1";
-    });
+    if (goals && Array.isArray(goals)) {
+        goals.forEach((g) => {
+            goalColors[g.id] = g.color || "#6366f1";
+        });
+    }
 
     return (
         <div
@@ -107,7 +109,7 @@ export default function WeekOverview({ tasks, goals }: WeekOverviewProps) {
 
             {/* Legend */}
             <div className="mt-4 pt-4 border-t flex flex-wrap gap-3" style={{ borderColor: "var(--cardBorder)" }}>
-                {goals.slice(0, 3).map((goal) => (
+                {goals && Array.isArray(goals) && goals.slice(0, 3).map((goal) => (
                     <div key={goal.id} className="flex items-center gap-2">
                         <div
                             className="w-3 h,3 rounded-sm"

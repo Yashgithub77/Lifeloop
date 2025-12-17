@@ -15,6 +15,7 @@ import Chatbot from "@/components/Chatbot";
 import ThemeSelector from "@/components/ThemeSelector";
 import GoogleIntegration from "@/components/GoogleIntegration";
 import CalendarSync from "@/components/CalendarSync";
+import { useCalendarAutoSync } from "@/hooks/useCalendarAutoSync";
 
 interface DashboardData {
     goals: Goal[];
@@ -39,6 +40,9 @@ export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState<"today" | "insights" | "settings">("today");
     const [isReplanning, setIsReplanning] = useState(false);
     const [latestCoachMessage, setLatestCoachMessage] = useState<CoachMessage | null>(null);
+
+    // Auto-sync tasks to Google Calendar when they change
+    useCalendarAutoSync(data?.tasks || []);
 
     const fetchData = async () => {
         try {
