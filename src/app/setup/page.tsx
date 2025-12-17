@@ -87,10 +87,11 @@ export default function SetupPage() {
 
         try {
             console.log("Sending goals:", goals);
-            const res = await fetch("/api/generate-plan", {
+            // Try AI-powered generation first, falls back automatically if it fails
+            const res = await fetch("/api/generate-plan-ai", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ goals }),
+                body: JSON.stringify({ goals, useAI: true }),
             });
 
             console.log("Response status:", res.status);
